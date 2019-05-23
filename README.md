@@ -27,7 +27,7 @@ and a value `xs`, we can use `is_list/1` guard on `xs` and then ensure that all
 elements of the list conform to `t`. And if we have a more complex structure
 
 ```elixir
-@type state(a, b) :: %map{key1: {a, b}, key2: list_of_ts()}
+@type state(a, b) :: %{key1: {a, b}, key2: list_of_ts()}
 ```
 
 and a value `s`, we can check that `s` is a map which has keys `key1` and
@@ -80,3 +80,11 @@ expression it applies a specific clause of the checker function.
 
  - For practical reasons the generated function does not recurse down to
    `iolist()`, doing only simplified checks.
+
+## TODO
+
+ - Handle recursive types.
+
+ - Data generator.
+
+ - Better error messages.
