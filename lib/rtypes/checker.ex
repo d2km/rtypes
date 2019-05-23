@@ -215,6 +215,26 @@ defmodule RTypes.Checker do
 
   defp check(_term, {:type, _line, :term, []}, _ctx), do: true
 
+  ## unions
+  defp check(term, {:type, _, :union, types}, ctx) do
+    rv =
+      Enum.any?(types, fn typ ->
+        try do
+          check(term, typ, ctx)
+        rescue
+          _ ->
+            false
+        end
+      end)
+
+    if rv do
+      rv
+    else
+      raise "term #{inspect(term)} does not match union type " <>
+              "#{inspect(types)} in the context #{inspect(ctx)}"
+    end
+  end
+
   ## fall-through clauses
   defp check(term, typ, []) do
     raise "term #{inspect(term)} does not conform to type #{inspect(typ)}"
