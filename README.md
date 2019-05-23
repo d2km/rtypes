@@ -13,20 +13,20 @@ Let's suppose we have a type
 and we have a value `x`. To ensure that our value corresponds to type `t` we can
 use the function
 
-```
+```elixir
 def is_t(x) when is_integer(x) and x >= 0 and x <= 255
 ```
 
 Now, if we have a compound type
 
-```
+```elixir
 @type list_of_ts :: [t]
 ```
 
 and a value `xs`, we can use `is_list/1` guard on `xs` and then ensure that all
 elements of the list conform to `t`. And if we have a more complex structure
 
-```
+```elixir
 @type state(a, b) :: %map{key1: {a, b}, key2: list_of_ts()}
 ```
 
@@ -45,7 +45,7 @@ to derive a run-time checker for the given type.
 
 ### `derive/1` macro
 
-  ```
+  ```elixir
   iex> require RTypes, as: RTypes
   iex> is_port_number = RTypes.derive(:inet.port_number())
   iex> is_port_number.(8080)
@@ -60,7 +60,7 @@ enclosed in parenthesis.
 
 The function expects a module
 
-  ```
+  ```elixir
   iex> is_keyword_list = RTypes.derive(Keyword, :t, [{:type, 0, :pos_integer, []}])
   iex> is_keyword_list.(key1: 4, key2: 5)
   true
@@ -68,5 +68,5 @@ The function expects a module
 
 ## Notes
 
-For practical reasons the function does not recurse down to `iolist()`, doing
-only simplified checks.
+ - For practical reasons the function does not recurse down to `iolist()`, doing
+   only simplified checks.
