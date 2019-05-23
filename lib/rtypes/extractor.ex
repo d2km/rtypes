@@ -14,11 +14,11 @@ defmodule RTypes.Extractor do
   ## Usage
 
   ```
-    iex> extract_type(:inet, :port_number, [])
+    iex> RTypes.Extractor.extract_type(:inet, :port_number, [])
     {:type, 102, :range, [{:integer, 102, 0}, {:integer, 102, 65535}]}
 
-    iex> extract_type(Keyword, :t, [{:type, 0, :list, []}])
-    {:type, 0, :list, [{:type, 0, :tuple, [{:type, 74, :atom, []}, {:var, 78, :value}]}]}
+    iex> RTypes.Extractor.extract_type(Keyword, :t, [{:type, 0, :list, []}])
+    {:type, 0, :list, [{:type, 0, :tuple, [{:type, 74, :atom, []}, {:type, 0, :list, []}]}]}
 
   ```
   """
