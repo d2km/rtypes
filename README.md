@@ -10,8 +10,8 @@ Let's suppose we have a type
 @type t :: 0..255
 ```
 
-and we have a value `x`. To ensure that our value corresponds to type `t` we can
-use the function
+and we have a value `x`. To ensure that our value corresponds to the type `t` we
+can use the function
 
 ```elixir
 def is_t(x) when is_integer(x) and x >= 0 and x <= 255
@@ -41,7 +41,8 @@ That's the gist of it.
 ## Usage
 
 The library defines `derive/1` macro and `derive/3` function which can be used
-to derive a run-time checker for the given type.
+to derive a run-time checker for the given type. The checker function either
+returns `true` or throws an exception explaining what went wrong.
 
 ### `derive/1` macro
 
@@ -66,7 +67,16 @@ The function expects a module
   true
   ```
 
+## Implementation
+
+The generated function is essentially a walk-the-tree interpreter of the
+expanded AST that represents the type. However, instead of evaluating the
+expression it applies a specific clause of the checker function.
+
 ## Notes
 
- - For practical reasons the function does not recurse down to `iolist()`, doing
-   only simplified checks.
+ - The type must be fully instantiated, that is, all the type parameters should
+   be of a concrete type.
+
+ - For practical reasons the generated function does not recurse down to
+   `iolist()`, doing only simplified checks.
