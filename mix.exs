@@ -14,7 +14,7 @@ defmodule RTypes.MixProject do
       ],
       name: "RTypes",
       source_url: "https://github.com/d2km/rtypes",
-      deps: []
+      deps: [{:ex_doc, ">= 0.0.0", only: :dev}]
     ]
   end
 
