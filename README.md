@@ -47,7 +47,7 @@ returns `true` or throws an exception explaining what went wrong.
 ### `derive/1` macro
 
   ```elixir
-  iex> require RTypes, as: RTypes
+  iex> require RTypes
   iex> is_port_number = RTypes.derive(:inet.port_number())
   iex> is_port_number.(8080)
   true
