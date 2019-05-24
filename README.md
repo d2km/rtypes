@@ -59,7 +59,7 @@ enclosed in parenthesis.
 
 ### `derive/3` function
 
-The function expects a module
+The function expects a module, type name, and a list of type args, represented as AST
 
   ```elixir
   iex> is_keyword_list = RTypes.derive(Keyword, :t, [{:type, 0, :pos_integer, []}])
