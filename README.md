@@ -1,6 +1,6 @@
 # RTypes
 
-RTypes is a library which helps automatically create a verification function for
+RTypes is an Elixir library which helps automatically create a verification function for
 a given user type. The function can be used to check the shape of the data after
 de-serialisation or in unit-tests.
 
