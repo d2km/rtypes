@@ -79,7 +79,7 @@ expression it applies a specific clause of the checker function.
    be of a concrete type.
 
  - For practical reasons the generated function does not recurse down to
-   `iolist()`, doing only simplified checks.
+   `iolist()`, making only some simplified tests.
 
 ## TODO
 
