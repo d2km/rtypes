@@ -31,45 +31,41 @@ defmodule RTypes do
   ```
   """
 
-  defp expand_type_args(args) when is_list(args) do
+  defp expand_type_args(args) do
     Enum.map(args, fn arg ->
-      {mod, type_name, type_args} =
-        case arg do
-          {{:., _, [{:__aliases__, _, [mod]}, type]}, _, type_args} ->
-            {mod, type, type_args}
-
-          {{:., _, [mod, type]}, _, type_args} ->
-            {mod, type, type_args}
-
-          {type, _, type_args} ->
-            {nil, type, type_args}
-        end
-
-      {mod, type_name, type_args}
-
-      case mod do
-        nil ->
-          {:type, 0, type_name, expand_type_args(type_args)}
-
-        _mod_name ->
+      case arg do
+        {mod, type_name, type_args} ->
           {:remote_type, 0, [{:atom, 0, mod}, {:atom, 0, type_name}, expand_type_args(type_args)]}
+
+        {type_name, type_args} ->
+          {:type, 0, type_name, expand_type_args(type_args)}
       end
     end)
   end
 
-  defmacro derive(code) do
-    {mod, type_name, args} =
-      case quote(do: unquote(code)) do
-        {{:., _, [{:__aliases__, _, [mod]}, type]}, _, type_args} ->
-          {mod, type, type_args}
+  defp decompose_and_expand(expr, env) do
+    case Macro.decompose_call(expr) do
+      {mod, f, args} ->
+        {Macro.expand(mod, env), f, Enum.map(args, &decompose_and_expand(&1, env))}
 
-        {{:., _, [mod, type]}, _, type_args} ->
-          {mod, type, type_args}
+      {f, args} ->
+        {f, Enum.map(args, &decompose_and_expand(&1, env))}
+    end
+  end
+
+  defmacro derive(code) do
+    type_expr = decompose_and_expand(code, __CALLER__)
+
+    typ =
+      case type_expr do
+        {mod, type_name, args} ->
+          RTypes.Extractor.extract_type(mod, type_name, expand_type_args(args))
+
+        {type_name, args} ->
+          {:type, 0, type_name, expand_type_args(args)}
       end
 
-    typ = Macro.escape(RTypes.Extractor.extract_type(mod, type_name, expand_type_args(args)))
-
-    quote bind_quoted: [typ: typ] do
+    quote bind_quoted: [typ: Macro.escape(typ)] do
       fn term ->
         RTypes.Checker.check!(term, typ)
       end
