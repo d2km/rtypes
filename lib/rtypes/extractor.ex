@@ -14,11 +14,13 @@ defmodule RTypes.Extractor do
   ## Usage
 
   ```
-    iex> RTypes.Extractor.extract_type(:inet, :port_number, [])
-    {:type, 102, :range, [{:integer, 102, 0}, {:integer, 102, 65535}]}
+    iex> t = RTypes.Extractor.extract_type(:inet, :port_number, [])
+    iex> match?({:type, _, :range, [{:integer, _, 0}, {:integer, _, 65535}]}, t)
+    true
 
-    iex> RTypes.Extractor.extract_type(Keyword, :t, [{:type, 0, :list, []}])
-    {:type, 0, :list, [{:type, 0, :tuple, [{:type, 74, :atom, []}, {:type, 0, :list, []}]}]}
+    iex> t = RTypes.Extractor.extract_type(Keyword, :t, [{:type, 0, :list, []}])
+    iex> match?({:type, _, :list, [{:type, _, :tuple, [{:type, _, :atom, []}, {:type, _, :list, []}]}]}, t)
+    true
 
   ```
   """
@@ -124,17 +126,44 @@ defmodule RTypes.Extractor do
   end
 
   defp bind_type_vars({{:type, line, type_name, parameters}, type_vars}, type_args) do
-    bound_parameters = bind_parameters(type_name, parameters, type_vars, type_args)
+    bound_parameters =
+      bind_parameters(
+        type_name,
+        Enum.map(parameters, fn typ ->
+          bind_type_vars({typ, type_vars}, type_args)
+        end),
+        type_vars,
+        type_args
+      )
+
     {:type, line, type_name, bound_parameters}
   end
 
   defp bind_type_vars({{:user_type, line, type_name, parameters}, type_vars}, type_args) do
-    bound_parameters = bind_parameters(type_name, parameters, type_vars, type_args)
+    bound_parameters =
+      bind_parameters(
+        type_name,
+        Enum.map(parameters, fn typ ->
+          bind_type_vars({typ, type_vars}, type_args)
+        end),
+        type_vars,
+        type_args
+      )
+
     {:user_type, line, type_name, bound_parameters}
   end
 
   defp bind_type_vars({{:remote_type, line, [mod, type_name, parameters]}, type_vars}, type_args) do
-    bound_parameters = bind_parameters(type_name, parameters, type_vars, type_args)
+    bound_parameters =
+      bind_parameters(
+        type_name,
+        Enum.map(parameters, fn typ ->
+          bind_type_vars({typ, type_vars}, type_args)
+        end),
+        type_vars,
+        type_args
+      )
+
     {:remote_type, line, [mod, type_name, bound_parameters]}
   end
 
