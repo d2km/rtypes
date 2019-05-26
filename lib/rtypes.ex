@@ -6,29 +6,6 @@ defmodule RTypes do
   The module also defines a function `derive/3` which can be used at run
   time. However, it must be given arguments as module, type name, and a list of
   type args.
-
-  ## Usage
-
-  ### Using `derive/1` macro
-
-  ```
-  iex> require RTypes, as: RTypes
-  iex> is_port_number = RTypes.derive(:inet.port_number())
-  iex> is_port_number.(8080)
-  true
-  ```
-
-  Note that the macro expects the argument as in `module.type(arg1, arg2)`. That
-  is a module name followed by `.` and the type name, followed by type
-  parameters enclosed in parenthesis.
-
-  ### Using `derive/3` function
-
-  ```
-  iex> is_keyword_list = RTypes.derive(Keyword, :t, [{:type, 0, :pos_integer, []}])
-  iex> is_keyword_list.(key1: 4, key2: 5)
-  true
-  ```
   """
 
   defp expand_type_args(args) do
@@ -53,6 +30,27 @@ defmodule RTypes do
     end
   end
 
+  @doc """
+  Derive a validating function given some type expression.
+
+  ## Usage
+
+  ```
+  iex> require RTypes
+  iex> port_number? = RTypes.derive(:inet.port_number())
+  iex> port_number?.(8080)
+  true
+
+  iex> kw_list_of_pos_ints? = RTypes.derive(Keyword.t(pos_integer()))
+  iex> kw_list_of_pos_ints?.([a: 1, b: 2])
+  true
+  ```
+
+  Note that the macro expects the argument as in `module.type(arg1, arg2)`. That
+  is a module name followed by `.` and the type name, followed by type
+  parameters enclosed in parenthesis.
+
+  """
   defmacro derive(code) do
     type_expr = decompose_and_expand(code, __CALLER__)
 
@@ -72,6 +70,21 @@ defmodule RTypes do
     end
   end
 
+  @doc """
+  Derive a validating function given a module name, type name and type parameters.
+
+  Type arguments must be concrete types, either built-in or basic types like `list()`
+
+  ## Example
+
+  ```
+  iex> keyword_list? = RTypes.derive(Keyword, :t, [{:type, 0, :pos_integer, []}])
+  iex> keyword_list?.(key1: 4, key2: 5)
+  true
+  ```
+
+  """
+  @spec derive(module(), atom(), [RTypes.Extractor.type()]) :: (term -> true | no_return())
   def derive(mod, type_name, type_args) do
     typ = RTypes.Extractor.extract_type(mod, type_name, type_args)
 
