@@ -40,11 +40,14 @@ That's the gist of it.
 
 ## Usage
 
-The library defines `derive/1` macro and `derive/3` function which can be used
-to derive a run-time checker for the given type. The checker function either
-returns `true` or throws an exception explaining what went wrong.
+The library defines `derive!/1` macro, `derive!/3` and `derive/3` functions
+which can be used to derive a run-time checker for the given type. The
+validating function returned by "bang" versions either returns `true` or throws
+an exception explaining what went wrong. The function returned by `derive/3`
+does not throw, returning `true` or `false` and typically is faster than the
+throwing versions.
 
-### `derive/1` macro
+### `derive!/1` macro
 
   ```elixir
   iex> require RTypes
@@ -57,7 +60,7 @@ Note that the macro expects the argument as in `module.type(arg1, arg2)`. That
 is a module name followed by `.` and the type name, followed by type parameters
 enclosed in parenthesis.
 
-### `derive/3` function
+### `derive!/3` function
 
 The function expects a module, type name, and a list of type args, represented as AST
 
@@ -72,6 +75,10 @@ The function expects a module, type name, and a list of type args, represented a
 The generated function is essentially a walk-the-tree interpreter of the
 expanded AST that represents the type. However, instead of evaluating the
 expression it applies a specific clause of the checker function.
+
+`derive/3` provides alternative implementation where instead of walking the tree
+every time the validating function is invoked, the tree is walked only once, at
+the call site, building a corresponding tree of closures.
 
 ## Notes
 

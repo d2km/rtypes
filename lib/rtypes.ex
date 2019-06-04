@@ -37,11 +37,11 @@ defmodule RTypes do
 
   ```
   iex> require RTypes
-  iex> port_number? = RTypes.derive(:inet.port_number())
+  iex> port_number? = RTypes.derive!(:inet.port_number())
   iex> port_number?.(8080)
   true
 
-  iex> kw_list_of_pos_ints? = RTypes.derive(Keyword.t(pos_integer()))
+  iex> kw_list_of_pos_ints? = RTypes.derive!(Keyword.t(pos_integer()))
   iex> kw_list_of_pos_ints?.([a: 1, b: 2])
   true
   ```
@@ -50,8 +50,9 @@ defmodule RTypes do
   is a module name followed by `.` and the type name, followed by type
   parameters enclosed in parenthesis.
 
+  The function raises a run time exception with an explanation of what went wrong.
   """
-  defmacro derive(code) do
+  defmacro derive!(code) do
     type_expr = decompose_and_expand(code, __CALLER__)
 
     typ =
@@ -78,18 +79,54 @@ defmodule RTypes do
   ## Example
 
   ```
-  iex> keyword_list? = RTypes.derive(Keyword, :t, [{:type, 0, :pos_integer, []}])
+  iex> keyword_list? = RTypes.derive!(Keyword, :t, [{:type, 0, :pos_integer, []}])
   iex> keyword_list?.(key1: 4, key2: 5)
   true
   ```
 
+  The function raises a run time exception with an explanation of what went wrong.
   """
-  @spec derive(module(), atom(), [RTypes.Extractor.type()]) :: (term -> true | no_return())
-  def derive(mod, type_name, type_args) do
+  @spec derive!(module(), atom(), [RTypes.Extractor.type()]) :: (term -> true | no_return())
+  def derive!(mod, type_name, type_args) do
     typ = RTypes.Extractor.extract_type(mod, type_name, type_args)
 
     fn term ->
       RTypes.Checker.check!(term, typ)
     end
   end
+
+
+  @doc """
+  The same as `derive!/3` but always returns a value.
+
+  The returned validating function is typically faster than the 'bang' variant.
+  """
+  @spec derive(module(), atom(), [RTypes.Extractor.type()]) :: (any() -> boolean())
+  def derive(mod, type_name, type_args) do
+    typ = RTypes.Extractor.extract_type(mod, type_name, type_args)
+    RTypes.Lambda.build(typ)
+  end
+
+  @doc """
+  Derive a validating function given the type expression.
+
+  The returned function returns either `true` or `false`.
+  """
+  defmacro derive(code) do
+    type_expr = decompose_and_expand(code, __CALLER__)
+
+    typ =
+      case type_expr do
+        {mod, type_name, args} ->
+          RTypes.Extractor.extract_type(mod, type_name, expand_type_args(args))
+
+        {type_name, args} ->
+          {:type, 0, type_name, expand_type_args(args)}
+      end
+
+    quote bind_quoted: [typ: Macro.escape(typ)] do
+      RTypes.Lambda.build(typ)
+    end
+  end
+
 end
