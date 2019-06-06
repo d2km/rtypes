@@ -31,8 +31,7 @@ defmodule RTypes.ExtractorTest do
        :nonempty_maybe_improper_list}
     ]
 
-    cases
-    |> Enum.each(fn {type, type_args, expected_type} ->
+    Enum.each(cases, fn {type, type_args, expected_type} ->
       extracted_type =
         RTypes.Extractor.extract_type(
           BasicTypes,

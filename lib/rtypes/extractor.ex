@@ -125,6 +125,10 @@ defmodule RTypes.Extractor do
     end
   end
 
+  defp bind_type_vars({{:type, line, type_name, :any}, _type_vars}, _type_args) do
+    {:type, line, type_name, :any}
+  end
+
   defp bind_type_vars({{:type, line, type_name, parameters}, type_vars}, type_args) do
     bound_parameters =
       bind_parameters(

@@ -15,7 +15,10 @@ defmodule RTypes.MixProject do
       name: "RTypes",
       source_url: "https://github.com/d2km/rtypes",
       elixirc_paths: elixirc_paths(Mix.env()),
-      deps: [{:ex_doc, ">= 0.0.0", only: :dev}]
+      deps: [
+        {:ex_doc, ">= 0.0.0", only: :dev},
+        {:benchee, "~> 1.0", only: :dev}
+      ]
     ]
   end
 
@@ -24,7 +27,7 @@ defmodule RTypes.MixProject do
   end
 
   def elixirc_paths(_) do
-    ["lib", "test/lib"]
+    ["lib", "test/lib", "bench/lib"]
   end
 
   def application do

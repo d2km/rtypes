@@ -261,7 +261,7 @@ defmodule RTypes.Checker do
 
   defp check_map_field(term, {:type, _, :map_field_exact, [field_typ, val_typ]}, ctx) do
     rv =
-      Enum.reduce(true, Map.keys(term), fn {field, val} ->
+      Enum.any?(term, fn {field, val} ->
         try do
           check(field, field_typ, ctx) && check(val, val_typ, ctx)
         catch
