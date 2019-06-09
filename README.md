@@ -40,45 +40,36 @@ That's the gist of it.
 
 ## Usage
 
-The library defines `derive!/1` macro, `derive!/3` and `derive/3` functions
-which can be used to derive a run-time checker for the given type. The
-validating function returned by "bang" versions either returns `true` or throws
-an exception explaining what went wrong. The function returned by `derive/3`
-does not throw, returning `true` or `false` and typically is faster than the
-throwing versions.
-
-### `derive!/1` macro
+The library defines `derive_verifier/1` and `derive_predicate/1` macros, and
+`derive_verifier/3` and `derive_predicate/3` functions which can be used to
+build the functions at run time.  The difference between the two is that a
+`verifier` returns `:ok` or `{:error, reason}` where `reason` explains what went
+wrong, while a `predicate` returns only `true` or `false`.
 
   ```elixir
   iex> require RTypes
-  iex> is_port_number = RTypes.derive(:inet.port_number())
-  iex> is_port_number.(8080)
+  iex> port_number? = RTypes.derive_predicate(:inet.port_number())
+  iex> port_number?.(8080)
   true
-  ```
-
-Note that the macro expects the argument as in `module.type(arg1, arg2)`. That
-is a module name followed by `.` and the type name, followed by type parameters
-enclosed in parenthesis.
-
-### `derive!/3` function
-
-The function expects a module, type name, and a list of type args, represented as AST
-
-  ```elixir
-  iex> is_keyword_list = RTypes.derive(Keyword, :t, [{:type, 0, :pos_integer, []}])
-  iex> is_keyword_list.(key1: 4, key2: 5)
-  true
+  iex> port_number?.(80000)
+  false
+  iex> verify_is_kwlist = RTypes.derive_verifier(Keyword, :t, [{:type, 0, :pos_integer, []}])
+  iex> verify_is_kwlist.(key1: 4, key2: 5)
+  :ok
+  iex> {:error, _reason} = verify_is_kwlist.([1, 2, 3])
   ```
 
 ## Implementation
 
-The generated function is essentially a walk-the-tree interpreter of the
-expanded AST that represents the type. However, instead of evaluating the
-expression it applies a specific clause of the checker function.
+A generated verification function is essentially a walk-the-tree interpreter
+of the expanded AST that represents the type. However, instead of evaluating the
+AST it applies basic type checks.
 
-`derive/3` provides alternative implementation where instead of walking the tree
-every time the validating function is invoked, the tree is walked only once, at
-the call site, building a corresponding tree of closures.
+A generated predicate uses a different approach. It builds up a chain of
+suspended function calls (closures) which mirrors the type's AST. The benchmarks
+in `bench/` directory have shown that it works approximately 2x faster than the
+interpreted version. The downside is that it provides no explanation or failed
+cases.
 
 ## Notes
 
