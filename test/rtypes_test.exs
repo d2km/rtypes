@@ -5,8 +5,8 @@ defmodule RTypesTest do
   require RTypes
 
   test "CompexTypes.type_complex_map" do
-    f = RTypes.derive_predicate(ComplexTypes, :type_complex_map, [])
-    f2 = RTypes.derive_verifier(ComplexTypes, :type_complex_map, [])
+    f = RTypes.make_predicate(ComplexTypes, :type_complex_map, [])
+    f2 = RTypes.make_validator(ComplexTypes, :type_complex_map, [])
 
     assert f.(%{key1: [], key2: 15})
     assert match?(:ok, f2.(%{key1: [], key2: 15}))
@@ -21,8 +21,8 @@ defmodule RTypesTest do
   end
 
   test "ComplexTypes.M.t" do
-    f = RTypes.derive_predicate(ComplexTypes.M, :t, [])
-    f2 = RTypes.derive_verifier(ComplexTypes.M, :t, [])
+    f = RTypes.make_predicate(ComplexTypes.M, :t, [])
+    f2 = RTypes.make_validator(ComplexTypes.M, :t, [])
 
     assert f.(%ComplexTypes.M{a: "hi", b: 15})
     assert f2.(%ComplexTypes.M{a: "hi", b: 15})

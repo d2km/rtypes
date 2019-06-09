@@ -1,6 +1,6 @@
 # RTypes
 
-RTypes is an Elixir library which helps automatically create a verification function for
+RTypes is an Elixir library which helps automatically create a validation function for
 a given user type. The function can be used to check the shape of the data after
 de-serialisation or in unit-tests.
 
@@ -40,28 +40,28 @@ That's the gist of it.
 
 ## Usage
 
-The library defines `derive_verifier/1` and `derive_predicate/1` macros, and
-`derive_verifier/3` and `derive_predicate/3` functions which can be used to
+The library defines `make_validator/1` and `make_predicate/1` macros, and
+`make_validator/3` and `make_predicate/3` functions which can be used to
 build the functions at run time.  The difference between the two is that a
-`verifier` returns `:ok` or `{:error, reason}` where `reason` explains what went
+`validator` returns `:ok` or `{:error, reason}` where `reason` explains what went
 wrong, while a `predicate` returns only `true` or `false`.
 
   ```elixir
   iex> require RTypes
-  iex> port_number? = RTypes.derive_predicate(:inet.port_number())
+  iex> port_number? = RTypes.make_predicate(:inet.port_number())
   iex> port_number?.(8080)
   true
   iex> port_number?.(80000)
   false
-  iex> verify_is_kwlist = RTypes.derive_verifier(Keyword, :t, [{:type, 0, :pos_integer, []}])
-  iex> verify_is_kwlist.(key1: 4, key2: 5)
+  iex> validate_is_kwlist = RTypes.make_validator(Keyword, :t, [{:type, 0, :pos_integer, []}])
+  iex> validate_is_kwlist.(key1: 4, key2: 5)
   :ok
-  iex> {:error, _reason} = verify_is_kwlist.([1, 2, 3])
+  iex> {:error, _reason} = validate_is_kwlist.([1, 2, 3])
   ```
 
 ## Implementation
 
-A generated verification function is essentially a walk-the-tree interpreter
+A generated validation function is essentially a walk-the-tree interpreter
 of the expanded AST that represents the type. However, instead of evaluating the
 AST it applies basic type checks.
 

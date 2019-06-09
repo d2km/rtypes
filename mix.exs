@@ -26,8 +26,16 @@ defmodule RTypes.MixProject do
     ["lib"]
   end
 
-  def elixirc_paths(_) do
+  def elixirc_paths(:dev) do
+    ["lib"]
+  end
+
+  def elixirc_paths(:test) do
     ["lib", "test/lib", "bench/lib"]
+  end
+
+  def elixirc_paths(:bench) do
+    ["lib", "bench/lib"]
   end
 
   def application do

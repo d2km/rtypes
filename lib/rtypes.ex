@@ -1,6 +1,6 @@
 defmodule RTypes do
   @moduledoc """
-  RTypes is an Elixir library which helps automatically create a verification function for
+  RTypes is an Elixir library which helps automatically create a validation function for
   a given user type. The function can be used to check the shape of the data after
   de-serialisation or in unit-tests.
 
@@ -39,23 +39,23 @@ defmodule RTypes do
 
   ## Usage
 
-  The library defines `derive_verifier/1` and `derive_predicate/1` macros, and
-  `derive_verifier/3` and `derive_predicate/3` functions which can be used at run
-  time. The difference between the two is that a `verifier` returns `:ok` or
-  `{:error, reason}` where `reason` explains what went wrong, while a `predicate`
-  returns only `true` or `false` and is somewhat faster.
+  The library defines `make_validator/1` and `make_predicate/1` macros, and
+  `make_validator/3` and `make_predicate/3` functions which can be used at run
+  time. The difference between the two is that a `validator` returns `:ok` or
+  `{:error, reason}` where `reason` explains what went wrong, while a
+  `predicate` returns only `true` or `false` and is somewhat faster.
 
   ```elixir
   iex> require RTypes
-  iex> port_number? = RTypes.derive_predicate(:inet.port_number())
+  iex> port_number? = RTypes.make_predicate(:inet.port_number())
   iex> port_number?.(8080)
   true
   iex> port_number?.(80000)
   false
-  iex> verify_is_kwlist = RTypes.derive_verifier(Keyword, :t, [{:type, 0, :pos_integer, []}])
-  iex> verify_is_kwlist.(key1: 4, key2: 5)
+  iex> validate_is_kwlist = RTypes.make_validator(Keyword, :t, [{:type, 0, :pos_integer, []}])
+  iex> validate_is_kwlist.(key1: 4, key2: 5)
   :ok
-  iex> match?({:error, _reason}, verify_is_kwlist.([1, 2, 3]))
+  iex> match?({:error, _reason}, validate_is_kwlist.([1, 2, 3]))
   true
   ```
 
@@ -71,7 +71,7 @@ defmodule RTypes do
 
   @spec format_error_description(error_description()) :: String.t()
   def format_error_description(desc) do
-    "error verifying term #{inspect(desc[:term])}, reason #{desc[:message]}" <>
+    "fail to validate term #{inspect(desc[:term])}, reason #{desc[:message]}" <>
       case desc[:types] do
         nil -> ""
         types -> ", types #{inspect(types)}"
@@ -83,20 +83,20 @@ defmodule RTypes do
   end
 
   @doc """
-  Derive a verification function for the given type expression.
+  Derive a validtation function for the given type expression.
 
   ## Usage
 
   ```
   iex> require RTypes
-  iex> validate_port_number = RTypes.derive_verifier(:inet.port_number())
+  iex> validate_port_number = RTypes.make_validator(:inet.port_number())
   iex> validate_port_number.(8080)
   :ok
   iex> match?({:error, _}, validate_port_number.(70000))
   true
 
-  iex> verify_kw_list = RTypes.derive_verifier(Keyword.t(pos_integer()))
-  iex> verify_kw_list.([a: 1, b: 2])
+  iex> validate_kw_list = RTypes.make_validator(Keyword.t(pos_integer()))
+  iex> validate_kw_list.([a: 1, b: 2])
   :ok
   ```
 
@@ -109,7 +109,7 @@ defmodule RTypes do
   The returned function either returns `:ok` or `{:error, reason}` where
   `reason` details what went wrong.
   """
-  defmacro derive_verifier(code) do
+  defmacro make_validator(code) do
     type_expr = decompose_and_expand(code, __CALLER__)
 
     typ =
@@ -151,24 +151,24 @@ defmodule RTypes do
   end
 
   @doc """
-  Derive a verification function given a module name, type name, and type parameters.
+  Derive a validation function given a module name, type name, and type parameters.
 
   Type parameters must be of some concrete type.
 
   ## Example
 
   ```
-  iex> verify_kw_list = RTypes.derive_verifier(Keyword, :t, [{:type, 0, :pos_integer, []}])
-  iex> verify_kw_list.(key1: 4, key2: 5)
+  iex> validate_kw_list = RTypes.make_validator(Keyword, :t, [{:type, 0, :pos_integer, []}])
+  iex> validate_kw_list.(key1: 4, key2: 5)
   :ok
   ```
 
   The function returns either `:ok` or `{:error, error_description}` where
   `error_description` details what went wrong.
   """
-  @spec derive_verifier(module(), atom(), [RTypes.Extractor.type()]) ::
+  @spec make_validator(module(), atom(), [RTypes.Extractor.type()]) ::
           (term -> :ok | {:error, error_description()})
-  def derive_verifier(mod, type_name, type_args) do
+  def make_validator(mod, type_name, type_args) do
     typ = RTypes.Extractor.extract_type(mod, type_name, type_args)
 
     fn term ->
@@ -181,7 +181,7 @@ defmodule RTypes do
 
   ```
   iex> require RTypes
-  iex> non_neg_integer? = RTypes.derive_predicate(non_neg_integer())
+  iex> non_neg_integer? = RTypes.make_predicate(non_neg_integer())
   iex> non_neg_integer?.(10)
   true
   iex> non_neg_integer?.(0)
@@ -192,7 +192,7 @@ defmodule RTypes do
   false
   ```
   """
-  defmacro derive_predicate(code) do
+  defmacro make_predicate(code) do
     type_expr = decompose_and_expand(code, __CALLER__)
 
     typ =
@@ -212,15 +212,15 @@ defmodule RTypes do
   @doc """
   Return a predicate given a module name, type name, and type parameters.
 
-  The predicate behaves the same way as the one produced by `derive_predicate/1` macro.
+  The predicate behaves the same way as the one produced by `make_predicate/1` macro.
   """
-  @spec derive_predicate(module(), atom(), [RTypes.Extractor.type()]) :: (any() -> boolean())
-  def derive_predicate(mod, type_name, type_args) do
+  @spec make_predicate(module(), atom(), [RTypes.Extractor.type()]) :: (any() -> boolean())
+  def make_predicate(mod, type_name, type_args) do
     typ = RTypes.Extractor.extract_type(mod, type_name, type_args)
     RTypes.Lambda.build(typ)
   end
 
-  @deprecated "use derive_verifier/1 instead"
+  @deprecated "use make_validator/1 instead"
   defmacro derive!(code) do
     type_expr = decompose_and_expand(code, __CALLER__)
 
@@ -243,7 +243,7 @@ defmodule RTypes do
     end
   end
 
-  @deprecated "use derive_verifier/3 instead"
+  @deprecated "use make_validator/3 instead"
   def derive!(mod, type_name, type_args) do
     typ = RTypes.Extractor.extract_type(mod, type_name, type_args)
 
@@ -255,7 +255,7 @@ defmodule RTypes do
     end
   end
 
-  @deprecated "use derive_predicate/1 instead"
+  @deprecated "use make_predicate/1 instead"
   defmacro derive(code) do
     type_expr = decompose_and_expand(code, __CALLER__)
 
@@ -273,7 +273,7 @@ defmodule RTypes do
     end
   end
 
-  @deprecated "use derive_predicate/3 instead"
+  @deprecated "use make_predicate/3 instead"
   def derive(mod, type_name, type_args) do
     typ = RTypes.Extractor.extract_type(mod, type_name, type_args)
     RTypes.Lambda.build(typ)
