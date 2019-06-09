@@ -4,7 +4,7 @@ defmodule RTypes.MixProject do
   def project do
     [
       app: :rtypes,
-      version: "0.2.0",
+      version: "0.2.1",
       elixir: "~> 1.7",
       start_permanent: Mix.env() == :prod,
       description: "Automatically generate run time type checkers",
@@ -17,7 +17,7 @@ defmodule RTypes.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       deps: [
         {:ex_doc, ">= 0.0.0", only: :dev},
-        {:benchee, "~> 1.0", only: :dev}
+        {:benchee, "~> 1.0", only: :bench}
       ]
     ]
   end
@@ -26,8 +26,16 @@ defmodule RTypes.MixProject do
     ["lib"]
   end
 
-  def elixirc_paths(_) do
+  def elixirc_paths(:dev) do
+    ["lib"]
+  end
+
+  def elixirc_paths(:test) do
     ["lib", "test/lib", "bench/lib"]
+  end
+
+  def elixirc_paths(:bench) do
+    ["lib", "bench/lib"]
   end
 
   def application do

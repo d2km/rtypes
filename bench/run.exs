@@ -1,10 +1,10 @@
 require RTypes
 
-simple_t_labmda? = RTypes.derive(Simple.t())
-simple_t_interpreter? = RTypes.derive!(Simple.t())
+simple_t_labmda? = RTypes.make_predicate(Simple.t())
+simple_t_interpreter? = RTypes.make_validator(Simple.t())
 
-complex_t_labmda? = RTypes.derive(Complex, :t, [])
-complex_t_interpreter? = RTypes.derive!(Complex, :t, [])
+complex_t_labmda? = RTypes.make_predicate(Complex, :t, [])
+complex_t_interpreter? = RTypes.make_validator(Complex, :t, [])
 
 simple_term = Simple.t_value()
 complex_term = Complex.t_value()
