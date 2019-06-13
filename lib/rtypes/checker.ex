@@ -244,7 +244,7 @@ defmodule RTypes.Checker do
        when is_integer(term) and term >= 0 and term < 0x10FFFF,
        do: :ok
 
-  defp check(:ok, {:type, _line, :boolean, []}, _ctx), do: :ok
+  defp check(true, {:type, _line, :boolean, []}, _ctx), do: :ok
   defp check(false, {:type, _line, :boolean, []}, _ctx), do: :ok
   defp check(term, {:type, _line, :bitstring, []}, _ctx) when is_binary(term), do: :ok
   defp check(term, {:type, _line, :binary, []}, _ctx) when is_binary(term), do: :ok
