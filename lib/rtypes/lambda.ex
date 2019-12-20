@@ -291,5 +291,15 @@ defmodule RTypes.Lambda do
     end
   end
 
-  defp build_map_field({:type, _, :map_field_assoc, _}), do: fn _ -> true end
+  defp build_map_field({:type, _, :map_field_assoc, [field_typ, val_typ]}) do
+    field_typ? = build(field_typ)
+    val_typ? = build(val_typ)
+
+    fn term ->
+      case Enum.find(Map.keys(term), field_typ?) do
+        nil -> true
+        key -> val_typ?.(Map.get(term, key))
+      end
+    end
+  end
 end
