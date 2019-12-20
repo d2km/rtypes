@@ -70,7 +70,7 @@ defmodule RTypes.Lambda do
     end
   end
 
-  def build({:type, 0, :nonempty_list, []}), do: fn term -> Enum.count(term) > 0 end
+  def build({:type, _line, :nonempty_list, []}), do: fn term -> Enum.count(term) > 0 end
 
   def build({:type, _line, :nonempty_list, [typ]}) do
     typ? = build(typ)
