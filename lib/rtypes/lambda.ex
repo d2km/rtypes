@@ -199,6 +199,23 @@ defmodule RTypes.Lambda do
     end
   end
 
+  def build({:type, _line, :nonempty_string, []}) do
+    fn
+      [_ | _] = term ->
+        is_list(term) and
+          Enum.all?(term, fn
+            x when is_integer(x) and x >= 0 and x < 0x10FFFF ->
+              true
+
+            _ ->
+              false
+          end)
+
+      _ ->
+        false
+    end
+  end
+
   def build({:type, _line, :number, []}), do: &is_number(&1)
   def build({:type, _line, :node, []}), do: &is_atom(&1)
 
