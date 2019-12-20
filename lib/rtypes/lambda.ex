@@ -252,7 +252,6 @@ defmodule RTypes.Lambda do
   def build({:type, _line, :boolean, []}), do: &is_boolean(&1)
 
   def build({:type, _line, :bitstring, []}), do: &is_binary(&1)
-  def build({:type, _line, :binary, []}), do: &is_binary(&1)
 
   def build({:type, _line, :arity, []}) do
     fn term ->
