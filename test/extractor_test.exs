@@ -1,5 +1,6 @@
 defmodule RTypes.ExtractorTest do
   use ExUnit.Case
+  alias RTypes.Test.BasicTypes
   doctest RTypes.Extractor
 
   test "basic types" do

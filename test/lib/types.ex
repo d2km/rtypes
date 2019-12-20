@@ -1,4 +1,4 @@
-defmodule BasicTypes do
+defmodule RTypes.Test.BasicTypes do
   @type type_any :: any()
   @type type_none::none()
   @type type_atom::atom()
@@ -75,9 +75,9 @@ defmodule BasicTypes do
   @type type_timeout :: timeout()
 end
 
-defmodule ComplexTypes do
+defmodule RTypes.Test.ComplexTypes do
   @type type_complex_map :: %{
-    key1: [GenericTypes.type_generic(atom(), String.t())],
+    key1: [RTypes.Test.GenericTypes.type_generic(atom(), String.t())],
     key2: pos_integer()
   }
 
@@ -92,14 +92,14 @@ defmodule ComplexTypes do
   end
 end
 
-defmodule GenericTypes do
+defmodule RTypes.Test.GenericTypes do
   @type type_generic(a, b) :: {a, b}
   @type type_generic2(a) :: {a, a}
   @type type_instansiated :: type_generic(byte(), any())
   @type type_instansiated2 :: type_generic2(binary())
 end
 
-defmodule RemoteTypes do
-  @type type_remote_generic(a, b) :: GenericTypes.type_generic(a, b)
+defmodule RTypes.Test.RemoteTypes do
+  @type type_remote_generic(a, b) :: RTypes.Test.GenericTypes.type_generic(a, b)
   @type type_remote_existing(a) :: Keyword.t(list(a))
 end
