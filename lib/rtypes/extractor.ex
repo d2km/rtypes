@@ -4,7 +4,7 @@ defmodule RTypes.Extractor do
 
   ## Arguments
 
-    * `mod` - module
+    * `mod` - a module name or a tuple of a module name and object code
 
     * `type_name` - type name
 
@@ -29,13 +29,16 @@ defmodule RTypes.Extractor do
   @type value :: {value_tag :: atom(), line :: integer(), term()}
   @type unfolded_type :: {:type, line :: integer(), atom(), [type | value]}
 
-  @spec extract_type(module(), atom(), [type | value]) :: unfolded_type()
+  @spec extract_type(what, atom(), [type | value]) :: unfolded_type()
+        when what: module() | {module(), binary()}
   def extract_type(mod, type_name, type_args) do
     {typ, mod_types} = find_type(mod, type_name, Enum.count(type_args))
     unfold_type(bind_type_vars(typ, type_args), mod_types)
   end
 
-  defp find_type(mod, type_name, arity) do
+  defp find_type(what, type_name, arity) do
+    mod = ensure_module_loaded(what)
+
     mod_types =
       case Code.Typespec.fetch_types(mod) do
         {:ok, types} ->
@@ -177,4 +180,37 @@ defmodule RTypes.Extractor do
   end
 
   defp bind_type_vars({{_kind, _line, _value} = val, _}, _), do: val
+
+  defp ensure_module_loaded(mod) when is_atom(mod) do
+    case :code.ensure_loaded(mod) do
+      {:module, ^mod} ->
+        case :code.is_loaded(mod) do
+          {:file, path} when is_list(path) ->
+            # `path` is something like `/foo/blah/Elixir.MyModule.beam`
+            # Add the directory, just in case
+            true = :code.add_path(String.to_charlist(Path.dirname(path)))
+            mod
+
+          {:file, _path} ->
+            # when `path` is not a list, do nothing
+            mod
+
+          false ->
+            raise "Module #{mod} can not be loaded"
+        end
+
+      {:error, reason} ->
+        raise "Module #{mod} can not be loaded, reason #{inspect(reason)}"
+    end
+  end
+
+  defp ensure_module_loaded({mod_name, obj_code}) do
+    case :code.load_binary(mod_name, 'rtypes', obj_code) do
+      {:module, ^mod_name} ->
+        obj_code
+
+      {:error, reason} ->
+        raise "Module #{mod_name} can not be loaded, reason #{inspect(reason)}"
+    end
+  end
 end
