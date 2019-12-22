@@ -83,6 +83,6 @@ cases.
 
  - Handle recursive types.
 
- - Data generator.
+ - ~~Data generator~~ *DONE*.
 
  - Better error messages.

@@ -17,7 +17,9 @@ defmodule RTypes.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       deps: [
         {:ex_doc, ">= 0.0.0", only: :dev},
-        {:benchee, "~> 1.0", only: :bench}
+        {:recon, "~> 2.5", only: :dev},
+        {:benchee, "~> 1.0", only: :bench},
+        {:stream_data, "~> 0.4.3"}
       ]
     ]
   end
