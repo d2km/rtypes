@@ -316,16 +316,34 @@ defmodule RTypes.Checker do
        types: types,
        ctx: ctx}
 
-    Enum.reduce_while(term, err, fn {field, val}, err ->
-      case {check(field, field_typ, ctx), check(val, val_typ, [{:map_field, field} | ctx])} do
-        {:ok, :ok} -> {:halt, :ok}
-        _ -> {:cont, err}
+    Enum.reduce_while(Map.keys(term), err, fn field, err ->
+      case check(field, field_typ, ctx) do
+        :ok ->
+          case check(Map.get(term, field), val_typ, [{:map_field, field} | ctx]) do
+            :ok -> {:halt, :ok}
+            {:error, _} -> {:cont, err}
+          end
+
+        {:error, _} ->
+          {:cont, err}
       end
     end)
   end
 
-  defp check_map_field(_term, {:type, _, :map_field_assoc, _}, _ctx) do
-    # it is not exactly clear how to check the presence of an optional value
-    :ok
+  defp check_map_field(term, {:type, _, :map_field_assoc, [field_typ, val_typ]}, ctx) do
+    # for optional fields we deman that if any of the keys correspond
+    # to `field_typ` then its value must be of `val_typ`
+    Enum.find_value(Map.keys(term), :ok, fn field ->
+      case check(field, field_typ, ctx) do
+        :ok ->
+          case check(Map.get(term, field), val_typ, [{:map_field, field} | ctx]) do
+            :ok -> :ok
+            {:error, _} = err -> err
+          end
+
+        {:error, _} ->
+          false
+      end
+    end)
   end
 end
