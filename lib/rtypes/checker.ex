@@ -98,7 +98,7 @@ defmodule RTypes.Checker do
     end)
   end
 
-  defp check([_ | _] = _term, {:type, 0, :nonempty_list, []}, _ctx), do: :ok
+  defp check([_ | _] = _term, {:type, _line, :nonempty_list, []}, _ctx), do: :ok
 
   defp check([_ | _] = term, {:type, _line, :nonempty_list, [typ]}, ctx) do
     Enum.reduce_while(term, :ok, fn elem, _ ->
@@ -208,6 +208,22 @@ defmodule RTypes.Checker do
       _, _ ->
         {:error, term: term, message: "term does not conform to type 'string'", ctx: ctx}
     end)
+  end
+
+  defp check(term, {:type, _line, :nonempty_string, []}, ctx) when is_list(term) do
+    case term do
+      [_ | _] ->
+        Enum.reduce_while(term, :ok, fn
+          x, _ when is_integer(x) and x >= 0 and x < 0x10FFFF ->
+            {:cont, :ok}
+
+          _, _ ->
+            {:error, term: term, message: "term does not conform to type 'string'", ctx: ctx}
+        end)
+
+      _ ->
+        {:error, term: term, message: "term does not conform to type 'nonempty_string'", ctx: ctx}
+    end
   end
 
   defp check(term, {:type, _line, :number, []}, _ctx) when is_number(term), do: :ok
