@@ -81,6 +81,21 @@ defmodule RTypes.Test.ComplexTypes do
     key2: pos_integer()
   }
 
+  @type type_required_keys_map :: %{
+    required(integer()) => String.t(),
+    required(atom()) => iodata()
+  }
+
+  @type type_optional_keys_map :: %{
+    optional(integer()) => String.t()
+  }
+
+  @type type_mixed_keys_map :: %{
+    required(:foo) => String.t(),
+    required(integer()) => atom(),
+    optional(String.t()) => integer()
+  }
+
   @type type_union(a, b) :: {:ok, a} | {:error, b}
 
   @type type_recursive(a) :: nil | {a, type_recursive(a)}
