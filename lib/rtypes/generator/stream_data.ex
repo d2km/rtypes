@@ -5,11 +5,14 @@ defmodule RTypes.Generator.StreamData do
 
   import StreamData
 
+  @behaviour RTypes.Generator
+
   @doc """
   Derive a StreamData generator for the specified type AST.
   """
   @spec derive(RTypes.Extractor.type()) :: StreamData.t(v)
         when v: term()
+  @impl RTypes.Generator
   def derive({:type, _line, :any, _args}), do: term()
 
   def derive({:type, _line, :atom, _args}), do: atom(:alphanumeric)

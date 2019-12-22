@@ -34,6 +34,8 @@ defmodule RTypes.Generator do
 
   import RTypes.Internal, only: [decompose_and_expand: 2, expand_type_args: 1]
 
+  @callback derive(RTypes.Extractor.type()) :: generator when generator: term()
+
   @doc """
   Make a data generator for the given type and backend.
 

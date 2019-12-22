@@ -63,8 +63,11 @@ wrong, while a `predicate` returns only `true` or `false`.
 
 The library provides `Generator` module which defines the `make/4`
 function and `make/2` macro to be used with property-based
-frameworks. The `StreamData` backend is provided with the library,
-while `PropCheck` backend can be found in `rtypes_propcheck` library.
+frameworks. The
+[`StreamData`](https://hexdocs.pm/stream_data/StreamData.html) backend
+is provided with the library, while
+[`PropCheck`](https://hexdocs.pm/propcheck/readme.html) backend can be
+found in `rtypes_propcheck` library.
 
 For example, to write a unit test for a pure function with a given
 spec to use with `StreamData` framework one could write something
