@@ -70,7 +70,7 @@ defmodule RTypes.Lambda do
     end
   end
 
-  def build({:type, 0, :nonempty_list, []}), do: fn term -> Enum.count(term) > 0 end
+  def build({:type, _line, :nonempty_list, []}), do: fn term -> Enum.count(term) > 0 end
 
   def build({:type, _line, :nonempty_list, [typ]}) do
     typ? = build(typ)
@@ -199,6 +199,23 @@ defmodule RTypes.Lambda do
     end
   end
 
+  def build({:type, _line, :nonempty_string, []}) do
+    fn
+      [_ | _] = term ->
+        is_list(term) and
+          Enum.all?(term, fn
+            x when is_integer(x) and x >= 0 and x < 0x10FFFF ->
+              true
+
+            _ ->
+              false
+          end)
+
+      _ ->
+        false
+    end
+  end
+
   def build({:type, _line, :number, []}), do: &is_number(&1)
   def build({:type, _line, :node, []}), do: &is_atom(&1)
 
@@ -252,7 +269,6 @@ defmodule RTypes.Lambda do
   def build({:type, _line, :boolean, []}), do: &is_boolean(&1)
 
   def build({:type, _line, :bitstring, []}), do: &is_binary(&1)
-  def build({:type, _line, :binary, []}), do: &is_binary(&1)
 
   def build({:type, _line, :arity, []}) do
     fn term ->
@@ -292,5 +308,15 @@ defmodule RTypes.Lambda do
     end
   end
 
-  defp build_map_field({:type, _, :map_field_assoc, _}), do: fn _ -> true end
+  defp build_map_field({:type, _, :map_field_assoc, [field_typ, val_typ]}) do
+    field_typ? = build(field_typ)
+    val_typ? = build(val_typ)
+
+    fn term ->
+      case Enum.find(Map.keys(term), field_typ?) do
+        nil -> true
+        key -> val_typ?.(Map.get(term, key))
+      end
+    end
+  end
 end

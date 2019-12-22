@@ -1,4 +1,4 @@
-defmodule BasicTypes do
+defmodule RTypes.Test.BasicTypes do
   @type type_any :: any()
   @type type_none::none()
   @type type_atom::atom()
@@ -25,11 +25,11 @@ defmodule BasicTypes do
 
   @type type_map_keys :: %{key1: type_any(), key2: any()}
   @type type_map_optional :: %{optional(integer()) => any(), required(atom()) => any()}
-  @type type_union::type_any() | type_none()
+  @type type_union::atom() | integer()
   @type type_range :: 1..10
   @type type_literal_atom :: :atom
   @type type_literal_integer :: 1
-  @type type_concrete_tuple :: {type_any(), type_none()}
+  @type type_concrete_tuple :: {type_integer(), type_float()}
   @type type_empty_list :: []
 
   ## literals
@@ -75,10 +75,25 @@ defmodule BasicTypes do
   @type type_timeout :: timeout()
 end
 
-defmodule ComplexTypes do
+defmodule RTypes.Test.ComplexTypes do
   @type type_complex_map :: %{
-    key1: [GenericTypes.type_generic(atom(), String.t())],
+    key1: [RTypes.Test.GenericTypes.type_generic(atom(), String.t())],
     key2: pos_integer()
+  }
+
+  @type type_required_keys_map :: %{
+    required(integer()) => String.t(),
+    required(atom()) => iodata()
+  }
+
+  @type type_optional_keys_map :: %{
+    optional(integer()) => String.t()
+  }
+
+  @type type_mixed_keys_map :: %{
+    required(:foo) => String.t(),
+    required(integer()) => atom(),
+    optional(String.t()) => integer()
   }
 
   @type type_union(a, b) :: {:ok, a} | {:error, b}
@@ -92,14 +107,14 @@ defmodule ComplexTypes do
   end
 end
 
-defmodule GenericTypes do
+defmodule RTypes.Test.GenericTypes do
   @type type_generic(a, b) :: {a, b}
   @type type_generic2(a) :: {a, a}
   @type type_instansiated :: type_generic(byte(), any())
   @type type_instansiated2 :: type_generic2(binary())
 end
 
-defmodule RemoteTypes do
-  @type type_remote_generic(a, b) :: GenericTypes.type_generic(a, b)
+defmodule RTypes.Test.RemoteTypes do
+  @type type_remote_generic(a, b) :: RTypes.Test.GenericTypes.type_generic(a, b)
   @type type_remote_existing(a) :: Keyword.t(list(a))
 end

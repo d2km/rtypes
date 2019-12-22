@@ -98,7 +98,7 @@ defmodule RTypes.Checker do
     end)
   end
 
-  defp check([_ | _] = _term, {:type, 0, :nonempty_list, []}, _ctx), do: :ok
+  defp check([_ | _] = _term, {:type, _line, :nonempty_list, []}, _ctx), do: :ok
 
   defp check([_ | _] = term, {:type, _line, :nonempty_list, [typ]}, ctx) do
     Enum.reduce_while(term, :ok, fn elem, _ ->
@@ -210,6 +210,22 @@ defmodule RTypes.Checker do
     end)
   end
 
+  defp check(term, {:type, _line, :nonempty_string, []}, ctx) when is_list(term) do
+    case term do
+      [_ | _] ->
+        Enum.reduce_while(term, :ok, fn
+          x, _ when is_integer(x) and x >= 0 and x < 0x10FFFF ->
+            {:cont, :ok}
+
+          _, _ ->
+            {:error, term: term, message: "term does not conform to type 'string'", ctx: ctx}
+        end)
+
+      _ ->
+        {:error, term: term, message: "term does not conform to type 'nonempty_string'", ctx: ctx}
+    end
+  end
+
   defp check(term, {:type, _line, :number, []}, _ctx) when is_number(term), do: :ok
   defp check(term, {:type, _line, :node, []}, _ctx) when is_atom(term), do: :ok
 
@@ -300,16 +316,34 @@ defmodule RTypes.Checker do
        types: types,
        ctx: ctx}
 
-    Enum.reduce_while(term, err, fn {field, val}, err ->
-      case {check(field, field_typ, ctx), check(val, val_typ, [{:map_field, field} | ctx])} do
-        {:ok, :ok} -> {:halt, :ok}
-        _ -> {:cont, err}
+    Enum.reduce_while(Map.keys(term), err, fn field, err ->
+      case check(field, field_typ, ctx) do
+        :ok ->
+          case check(Map.get(term, field), val_typ, [{:map_field, field} | ctx]) do
+            :ok -> {:halt, :ok}
+            {:error, _} -> {:cont, err}
+          end
+
+        {:error, _} ->
+          {:cont, err}
       end
     end)
   end
 
-  defp check_map_field(_term, {:type, _, :map_field_assoc, _}, _ctx) do
-    # it is not exactly clear how to check the presence of an optional value
-    :ok
+  defp check_map_field(term, {:type, _, :map_field_assoc, [field_typ, val_typ]}, ctx) do
+    # for optional fields we deman that if any of the keys correspond
+    # to `field_typ` then its value must be of `val_typ`
+    Enum.find_value(Map.keys(term), :ok, fn field ->
+      case check(field, field_typ, ctx) do
+        :ok ->
+          case check(Map.get(term, field), val_typ, [{:map_field, field} | ctx]) do
+            :ok -> :ok
+            {:error, _} = err -> err
+          end
+
+        {:error, _} ->
+          false
+      end
+    end)
   end
 end

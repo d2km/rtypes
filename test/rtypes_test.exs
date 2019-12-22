@@ -1,7 +1,7 @@
 defmodule RTypesTest do
   use ExUnit.Case
   doctest RTypes
-
+  alias RTypes.Test.ComplexTypes
   require RTypes
 
   test "CompexTypes.type_complex_map" do

@@ -59,6 +59,37 @@ wrong, while a `predicate` returns only `true` or `false`.
   iex> {:error, _reason} = validate_is_kwlist.([1, 2, 3])
   ```
 
+## Data Generators
+
+The library provides `Generator` module which defines the `make/4`
+function and `make/2` macro to be used with property-based
+frameworks. The `StreamData` backend is provided with the library,
+while `PropCheck` backend can be found in `rtypes_propcheck` library.
+
+For example, to write a unit test for a pure function with a given
+spec to use with `StreamData` framework one could write something
+along the lines:
+
+  ```elixir
+  defmodule MyTest do
+    use ExUnit.Case
+    use ExUnitProperties
+
+    require RTypes
+    require RTypes.Generator, as: Generator
+
+    # @spec f(arg_type) :: result_type
+    arg_type_gen = Generator.make(arg_type, Generator.StreamData)
+    result_type? = RTypes.make_predicate(result_type)
+
+    property \"for any parameter `f/1` returs value of `result_type`\" do
+      check all value <- arg_type_gen do
+        assert result_type?.(f(value))
+      end
+    end
+  end
+  ```
+
 ## Implementation
 
 A generated validation function is essentially a walk-the-tree interpreter
@@ -83,6 +114,6 @@ cases.
 
  - Handle recursive types.
 
- - Data generator.
+ - ~~Data generator~~ *DONE*.
 
  - Better error messages.
