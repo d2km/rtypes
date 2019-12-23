@@ -43,4 +43,27 @@ defmodule RTypes.ExtractorTest do
       assert match?({:type, _, ^expected_type, _}, extracted_type)
     end)
   end
+
+  test "Erlang types with ops on integers" do
+    types = [
+      :type_band,
+      :type_bor,
+      :type_bxor,
+      :type_bsl,
+      :type_bsr,
+      :type_div,
+      :type_rem,
+      :type_plus,
+      :type_minus,
+      :type_mult,
+      :type_bnot,
+      :type_uplus,
+      :type_uminus
+    ]
+
+    Enum.each(types, fn typ ->
+      extracted_type = RTypes.Extractor.extract_type(:basic_types, typ, [])
+      assert match?({:integer, _, _}, extracted_type)
+    end)
+  end
 end

@@ -26,13 +26,15 @@ defmodule RTypes.Test.BasicTypes do
   @type type_map_keys :: %{key1: type_any(), key2: any()}
   @type type_map_optional :: %{optional(integer()) => any(), required(atom()) => any()}
   @type type_union::atom() | integer()
-  @type type_range :: 1..10
-  @type type_literal_atom :: :atom
-  @type type_literal_integer :: 1
+  @type type_range :: -10..10
   @type type_concrete_tuple :: {type_integer(), type_float()}
   @type type_empty_list :: []
 
   ## literals
+  use Bitwise, only_operators: true
+  @type type_literal_character :: ?a
+  @type type_literal_atom :: :atom
+  @type type_literal_integer :: -1
   @type type_bitstring_empty :: <<>>
   @type type_bitstring_size :: <<_::10>>
   @type type_bitstring_units :: <<_::_*16>>
