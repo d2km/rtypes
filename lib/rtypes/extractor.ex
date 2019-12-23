@@ -179,6 +179,61 @@ defmodule RTypes.Extractor do
     typ
   end
 
+  ## operations on literal integers
+  defp bind_type_vars({{:op, _line, :-, {:integer, line, val}}, []}, []) do
+    {:integer, line, -1 * val}
+  end
+
+  defp bind_type_vars({{:op, _line, :+, {:integer, line, val}}, []}, []) do
+    {:integer, line, val}
+  end
+
+  use Bitwise
+  defp bind_type_vars({{:op, _line, :bnot, {:integer, line, val}}, []}, []) do
+    {:integer, line, bnot(val)}
+  end
+
+  defp bind_type_vars({{:op, line, :band, {:integer, _, lhs}, {:integer, _, rhs}}, []}, []) do
+    {:integer, line, band(lhs, rhs)}
+  end
+
+  defp bind_type_vars({{:op, line, :bxor, {:integer, _, lhs}, {:integer, _, rhs}}, []}, []) do
+    {:integer, line, bxor(lhs, rhs)}
+  end
+
+  defp bind_type_vars({{:op, line, :bor, {:integer, _, lhs}, {:integer, _, rhs}}, []}, []) do
+    {:integer, line, bor(lhs, rhs)}
+  end
+
+  defp bind_type_vars({{:op, line, :bsl, {:integer, _, lhs}, {:integer, _, rhs}}, []}, []) do
+    {:integer, line, bsl(lhs, rhs)}
+  end
+
+  defp bind_type_vars({{:op, line, :bsr, {:integer, _, lhs}, {:integer, _, rhs}}, []}, []) do
+    {:integer, line, bsl(lhs, rhs)}
+  end
+
+  defp bind_type_vars({{:op, line, :+, {:integer, _, lhs}, {:integer, _, rhs}}, []}, []) do
+    {:integer, line, lhs + rhs}
+  end
+
+  defp bind_type_vars({{:op, line, :-, {:integer, _, lhs}, {:integer, _, rhs}}, []}, []) do
+    {:integer, line, lhs - rhs}
+  end
+
+  defp bind_type_vars({{:op, line, :*, {:integer, _, lhs}, {:integer, _, rhs}}, []}, []) do
+    {:integer, line, lhs * rhs}
+  end
+
+  defp bind_type_vars({{:op, line, :div, {:integer, _, lhs}, {:integer, _, rhs}}, []}, []) do
+    {:integer, line, div(lhs, rhs)}
+  end
+
+  defp bind_type_vars({{:op, line, :rem, {:integer, _, lhs}, {:integer, _, rhs}}, []}, []) do
+    {:integer, line, rem(lhs, rhs)}
+  end
+
+  # literals
   defp bind_type_vars({{_kind, _line, _value} = val, _}, _), do: val
 
   defp ensure_module_loaded(mod) when is_atom(mod) do
