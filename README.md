@@ -32,7 +32,7 @@ elements of the list conform to `t`. And if we have a more complex structure
 
 and a value `s`, we can check that `s` is a map which has keys `key1` and
 `key2`, apply the logic above for the value of `key2` and for any concrete types
-`a` and `b` we can check that he value of `key1` is a tuple of length 2 and its
+`a` and `b` we can check that the value of `key1` is a tuple of length 2 and its
 elements conform to `a` and `b` respectively. So we just recursively apply those
 checks.
 
