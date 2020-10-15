@@ -85,7 +85,7 @@ defmodule RTypes do
   end
 
   @doc """
-  Derive a validtation function for the given type expression.
+  Derive a validation function for the given type expression.
 
   ## Usage
 
