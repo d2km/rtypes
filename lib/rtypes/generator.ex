@@ -1,7 +1,7 @@
 defmodule RTypes.Generator do
   @moduledoc """
   Generator module provides the `make/4` function and `make/2` macro
-  which allow to atomatically derive a data generator to be used with
+  which allow to automatically derive a data generator to be used with
   property-based frameworks.
 
   For example, to write a unit test for a pure function with a given
@@ -20,7 +20,7 @@ defmodule RTypes.Generator do
     arg_type_gen = Generator.make(arg_type, Generator.StreamData)
     result_type? = RTypes.make_predicate(result_type)
 
-    property \"for any parameter `f/1` returs value of `result_type`\" do
+    property \"for any parameter `f/1` returns value of `result_type`\" do
       check all value <- arg_type_gen do
         assert result_type?.(f(value))
       end
