@@ -286,6 +286,21 @@ defmodule RTypes.Checker do
     end)
   end
 
+  ## annotations
+  defp check(term, {:ann_type, _, [{:var, _, annotation}, typ]}, ctx) do
+    case check(term, typ, ctx) do
+      :ok ->
+        :ok
+
+      {:error, _} ->
+        {:error,
+         term: term,
+         message: "term does not match annotated #{annotation} type",
+         types: typ,
+         ctx: ctx}
+    end
+  end
+
   ## fall-through clause
   defp check(term, typ, ctx) do
     {:error, term: term, message: "term does not conform to type", types: [typ], ctx: ctx}
