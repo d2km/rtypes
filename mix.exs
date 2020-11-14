@@ -20,7 +20,7 @@ defmodule RTypes.MixProject do
         {:ex_doc, ">= 0.0.0", only: :dev},
         {:recon, "~> 2.5", only: :dev},
         {:benchee, "~> 1.0", only: :bench},
-        {:stream_data, "~> 0.4.3"}
+        {:stream_data, "~> 0.5"}
       ]
     ]
   end
